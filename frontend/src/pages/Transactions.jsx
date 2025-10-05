@@ -1,12 +1,12 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom'; // <-- import useNavigate
+import { useNavigate } from 'react-router-dom';
 import api from '../api/api';
 import { useAuth } from '../context/AuthContext';
 import TransactionForm from '../components/TransactionForm';
 
 const Transactions = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate(); // <-- initialize navigation
+  const { user, logout } = useAuth(); // get logout from AuthContext
+  const navigate = useNavigate();
 
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,6 +17,7 @@ const Transactions = () => {
   const [showForm, setShowForm] = useState(false);
   const [editTransaction, setEditTransaction] = useState(null);
 
+  // Fetch transactions from backend
   const fetchTransactions = async () => {
     setLoading(true);
     try {
@@ -33,11 +34,13 @@ const Transactions = () => {
     fetchTransactions();
   }, [filters]);
 
+  // Paginate transactions
   const paginatedTransactions = useMemo(() => {
     const start = (page - 1) * perPage;
     return transactions.slice(start, start + perPage);
   }, [transactions, page]);
 
+  // Delete transaction
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure?')) return;
     try {
@@ -48,19 +51,27 @@ const Transactions = () => {
     }
   };
 
+  // Open add form
   const handleAdd = () => {
     setEditTransaction(null);
     setShowForm(true);
   };
 
+  // Open edit form
   const handleEdit = (transaction) => {
     setEditTransaction(transaction);
     setShowForm(true);
   };
 
-  // Navigate to Analytics page
+  // Navigate to analytics
   const goToAnalytics = () => {
     navigate('/analytics');
+  };
+
+  // Logout user
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   return (
@@ -79,6 +90,12 @@ const Transactions = () => {
           onClick={goToAnalytics}
         >
           View Analytics
+        </button>
+        <button
+          style={{ ...styles.addButton, backgroundColor: '#f44336' }}
+          onClick={handleLogout}
+        >
+          Logout
         </button>
       </div>
 
@@ -179,7 +196,6 @@ const Transactions = () => {
     </div>
   );
 };
-
 // ...styles remain the same as before
 
 const styles = {

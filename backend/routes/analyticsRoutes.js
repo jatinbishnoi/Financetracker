@@ -1,12 +1,16 @@
 import express from 'express';
 import Transaction from '../models/Transaction.js';
+import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 // Monthly overview: total income & expense per month
-router.get('/monthly-overview', async (req, res) => {
+router.get('/monthly-overview', protect, async (req, res) => {
   try {
+    const matchQuery = req.user.role === 'admin' ? {} : { userId: req.user.id };
+
     const data = await Transaction.aggregate([
+      { $match: matchQuery },
       {
         $group: {
           _id: { month: { $month: '$date' }, year: { $year: '$date' } },
@@ -14,8 +18,9 @@ router.get('/monthly-overview', async (req, res) => {
           totalExpense: { $sum: { $cond: [{ $eq: ['$type', 'expense'] }, '$amount', 0] } },
         },
       },
-      { $sort: { '_id.year': 1, '_id.month': 1 } }
+      { $sort: { '_id.year': 1, '_id.month': 1 } },
     ]);
+
     res.json(data);
   } catch (err) {
     console.error(err);
@@ -24,13 +29,16 @@ router.get('/monthly-overview', async (req, res) => {
 });
 
 // Category breakdown: total per category
-router.get('/category-breakdown', async (req, res) => {
+router.get('/category-breakdown', protect, async (req, res) => {
   try {
+    const matchQuery = req.user.role === 'admin' ? { type: 'expense' } : { userId: req.user.id, type: 'expense' };
+
     const data = await Transaction.aggregate([
-      { $match: { type: 'expense' } },
+      { $match: matchQuery },
       { $group: { _id: '$category', total: { $sum: '$amount' } } },
       { $sort: { total: -1 } }
     ]);
+
     res.json(data);
   } catch (err) {
     console.error(err);
@@ -39,13 +47,15 @@ router.get('/category-breakdown', async (req, res) => {
 });
 
 // Income vs Expense trend (last 12 months)
-router.get('/income-expense-trend', async (req, res) => {
+router.get('/income-expense-trend', protect, async (req, res) => {
   try {
     const now = new Date();
     const lastYear = new Date(now.getFullYear(), now.getMonth() - 11, 1);
 
+    const matchQuery = req.user.role === 'admin' ? { date: { $gte: lastYear } } : { userId: req.user.id, date: { $gte: lastYear } };
+
     const data = await Transaction.aggregate([
-      { $match: { date: { $gte: lastYear } } },
+      { $match: matchQuery },
       {
         $group: {
           _id: { month: { $month: '$date' }, year: { $year: '$date' } },

@@ -6,7 +6,7 @@ export const getMonthlyOverview = async (req, res) => {
     const { userId, role } = req.user;
 
     // Only fetch user's own data unless admin
-    const matchQuery = role === 'admin' ? {} : { userId };
+    const matchQuery = role === 'admin' ? {} : { user: userId };
 
     const data = await Transaction.aggregate([
       { $match: matchQuery },
@@ -34,8 +34,7 @@ export const getMonthlyOverview = async (req, res) => {
 export const getCategoryBreakdown = async (req, res) => {
   try {
     const { userId, role } = req.user;
-
-    const matchQuery = role === 'admin' ? {} : { userId };
+    const matchQuery = role === 'admin' ? {} : { user: userId };
 
     const data = await Transaction.aggregate([
       { $match: { ...matchQuery, type: 'expense' } },
@@ -58,8 +57,7 @@ export const getCategoryBreakdown = async (req, res) => {
 export const getIncomeExpenseTrend = async (req, res) => {
   try {
     const { userId, role } = req.user;
-
-    const matchQuery = role === 'admin' ? {} : { userId };
+    const matchQuery = role === 'admin' ? {} : { user: userId };
 
     const data = await Transaction.aggregate([
       { $match: matchQuery },
