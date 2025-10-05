@@ -40,14 +40,6 @@ function App() {
                 </PrivateRoute>
               }
             />
-            <Route
-              path="/users"
-              element={
-                <PrivateRoute role="admin">
-                  <UsersPage />
-                </PrivateRoute>
-              }
-            />
 
             {/* Fallback route */}
             <Route path="*" element={<Navigate to="/login" />} />
