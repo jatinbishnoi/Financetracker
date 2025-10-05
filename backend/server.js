@@ -1,15 +1,13 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import mongoSanitize from 'express-mongo-sanitize';
-import xss from 'xss-clean';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 
 import authRoutes from './routes/authRoutes.js';
 import transactionRoutes from './routes/transactionRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
-import connectDB from './db.js'; // import db connection
+import connectDB from './db.js';
 
 dotenv.config();
 
@@ -18,27 +16,25 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cors());
-app.use(helmet());
-app.use(mongoSanitize());
-app.use(xss());
+app.use(helmet()); // keeps basic security headers
 
 // Rate limiting
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 5,
-  message: 'Too many auth requests, please try again later.',
+  message: 'Too many auth requests, try again later.'
 });
 
 const transactionLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
+  windowMs: 60 * 60 * 1000,
   max: 100,
-  message: 'Too many transaction requests, please try again later.',
+  message: 'Too many transaction requests, try again later.'
 });
 
 const analyticsLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
+  windowMs: 60 * 60 * 1000,
   max: 50,
-  message: 'Too many analytics requests, please try again later.',
+  message: 'Too many analytics requests, try again later.'
 });
 
 // Routes
@@ -49,7 +45,7 @@ app.use('/api/analytics', analyticsLimiter, analyticsRoutes);
 // Health check
 app.get('/', (req, res) => res.send('Backend is running!'));
 
-// Error handler
+// Global error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' });
