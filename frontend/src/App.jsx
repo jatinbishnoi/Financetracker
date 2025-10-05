@@ -8,7 +8,7 @@ const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const Transactions = lazy(() => import('./pages/Transactions'));
 const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
-const UsersPage = lazy(() => import('./pages/UsersPage')); // 👈 Admin-only page
+//const UsersPage = lazy(() => import('./pages/UsersPage')); // 👈 Admin-only page
 
 function App() {
   return (
