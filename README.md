@@ -1,4 +1,4 @@
-cat > README.md <<'EOL'
+
 # 💰 Personal Finance Tracker
 
 A full-stack application designed to help users track their income and expenses, visualize their financial habits, and manage their personal budgets effectively.
